@@ -15,7 +15,7 @@ const stateFromMachine = () => ({
   context: actor.state.context,
 });
 
-app.get("/start", async (req, res) => {
+app.post("/start", async (req, res) => {
   actor = interpret(machine);
 
   actor.start();
