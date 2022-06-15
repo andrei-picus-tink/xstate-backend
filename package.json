@@ -1,0 +1,21 @@
+{
+  "name": "xstate-backend",
+  "description": "PoC for an XState driven backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node-dev index.ts"
+  },
+  "dependencies": {
+    "express": "~4.18.1",
+    "xstate": "~4.32.1"
+  },
+  "devDependencies": {
+    "@types/node": "~17.0.43",
+    "@types/express": "~4.17.13",
+    "typescript": "~4.7.3",
+    "eslint": "~8.17.0",
+    "@nighttrax/eslint-config-ts": "~10.0.0-beta.2",
+    "ts-node-dev": "2.0.0"
+  }
+}
