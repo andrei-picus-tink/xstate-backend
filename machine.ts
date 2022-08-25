@@ -13,6 +13,11 @@ enum Provider {
   REDIRECT = "redirect",
 }
 
+const delay = (timeout: number) =>
+  new Promise((r) => {
+    setTimeout(r, timeout);
+  });
+
 export const machine = createMachine<Context>(
   {
     initial: "initial",
@@ -28,7 +33,11 @@ export const machine = createMachine<Context>(
     states: {
       initial: {
         invoke: {
-          src: () => Promise.resolve([Provider.PASSWORD, Provider.REDIRECT]),
+          src: async () => {
+            await delay(1000);
+
+            return [Provider.PASSWORD, Provider.REDIRECT];
+          },
           onDone: {
             target: "providers",
             actions: assign({
@@ -53,24 +62,36 @@ export const machine = createMachine<Context>(
         always: [
           {
             cond: (context) => context.selectedProvider === Provider.PASSWORD,
-            target: "fields",
-            actions: assign({
-              fields: (_) => [
-                {
-                  type: "text",
-                  name: "username",
-                },
-                {
-                  type: "text",
-                  name: "password",
-                },
-              ],
-            }),
+            target: "fetchFields",
           },
           {
             target: "redirect",
           },
         ],
+      },
+      fetchFields: {
+        invoke: {
+          src: async () => {
+            await delay(1000);
+
+            return [
+              {
+                type: "text",
+                name: "username",
+              },
+              {
+                type: "text",
+                name: "password",
+              },
+            ];
+          },
+          onDone: {
+            target: "fields",
+            actions: assign({
+              fields: (_, event) => event.data,
+            }),
+          },
+        },
       },
       fields: {
         tags: "ui",
@@ -86,6 +107,8 @@ export const machine = createMachine<Context>(
       checkFields: {
         invoke: {
           src: async (context, event) => {
+            await delay(1000);
+
             if (
               event.data.username !== "test" ||
               event.data.password !== "password"
@@ -110,10 +133,7 @@ export const machine = createMachine<Context>(
       },
       credentials: {
         invoke: {
-          src: () =>
-            new Promise((r) => {
-              setTimeout(r, 500);
-            }),
+          src: () => delay(1000),
           onDone: { target: "done" },
           onError: { target: "error", actions: "error" },
         },
