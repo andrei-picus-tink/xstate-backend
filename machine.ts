@@ -87,7 +87,7 @@ export const machine = createMachine<Context>(
         invoke: {
           src: async (context, event) => {
             if (
-              event.data.name !== "test" ||
+              event.data.username !== "test" ||
               event.data.password !== "password"
             ) {
               throw new Error("invalid credentials");
