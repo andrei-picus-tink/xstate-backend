@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import cors from "cors";
 import express from "express";
 import { interpret, InterpreterFrom } from "xstate";
 import { waitFor } from "xstate/lib/waitFor";
@@ -6,6 +7,7 @@ import { machine } from "./machine";
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 const port = 3000;
 
 let actor: InterpreterFrom<typeof machine>;
