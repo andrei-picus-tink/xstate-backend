@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { assign, createMachine } from "xstate";
 
 type Context = {
-  providers?: string[];
-  selectedProvider?: string;
+  providers?: Provider[];
+  selectedProvider?: Provider;
   fields?: { type: string; name: string }[];
   error?: string;
 };
 
-const fetchProviders = async (): Promise<string[]> =>
-  Promise.resolve(["nordea", "seb"]);
+enum Provider {
+  PASSWORD = "password",
+  REDIRECT = "redirect",
+}
 
 export const machine = createMachine<Context>(
   {
@@ -18,7 +21,6 @@ export const machine = createMachine<Context>(
       "*": {
         target: "error",
         actions: assign({
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           error: (_) => "Invalid event",
         }),
       },
@@ -26,7 +28,7 @@ export const machine = createMachine<Context>(
     states: {
       initial: {
         invoke: {
-          src: fetchProviders,
+          src: () => Promise.resolve([Provider.PASSWORD, Provider.REDIRECT]),
           onDone: {
             target: "providers",
             actions: assign({
@@ -40,10 +42,19 @@ export const machine = createMachine<Context>(
         tags: "ui",
         on: {
           SELECT: {
-            target: "provider",
+            target: "selectedProvider",
             actions: assign({
               selectedProvider: (context, event) => event.data,
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            }),
+          },
+        },
+      },
+      selectedProvider: {
+        always: [
+          {
+            cond: (context) => context.selectedProvider === Provider.PASSWORD,
+            target: "fields",
+            actions: assign({
               fields: (_) => [
                 {
                   type: "text",
@@ -56,17 +67,23 @@ export const machine = createMachine<Context>(
               ],
             }),
           },
-        },
+          {
+            target: "redirect",
+          },
+        ],
       },
-      provider: {
+      fields: {
         tags: "ui",
         on: {
           INPUT: {
-            target: "credentials",
+            target: "checkFields",
+            actions: assign({
+              fields: (_, event) => event.data,
+            }),
           },
         },
       },
-      credentials: {
+      checkFields: {
         invoke: {
           src: async (context, event) => {
             if (
@@ -76,15 +93,39 @@ export const machine = createMachine<Context>(
               throw new Error("invalid credentials");
             }
           },
-          onDone: { target: "done" },
+          onDone: { target: "credentials" },
           onError: {
             target: "error",
             actions: "error",
           },
         },
       },
+      redirect: {
+        tags: "ui",
+        on: {
+          RESUME: {
+            target: "credentials",
+          },
+        },
+      },
+      credentials: {
+        invoke: {
+          src: () =>
+            new Promise((r) => {
+              setTimeout(r, 500);
+            }),
+          onDone: { target: "done" },
+          onError: { target: "error", actions: "error" },
+        },
+      },
       done: { type: "final", tags: "ui" },
-      error: { type: "final", tags: "ui" },
+      error: {
+        type: "final",
+        tags: "ui",
+        data: (context) => ({
+          error: context.error,
+        }),
+      },
     },
   },
   {
