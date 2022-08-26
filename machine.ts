@@ -102,6 +102,7 @@ export const machine = createMachine<Context>(
               fields: (_, event) => event.data,
             }),
           },
+          BACK: { target: "providers" },
         },
       },
       checkFields: {
@@ -129,6 +130,7 @@ export const machine = createMachine<Context>(
           RESUME: {
             target: "credentials",
           },
+          BACK: { target: "providers" },
         },
       },
       credentials: {
