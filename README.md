@@ -18,16 +18,18 @@ POST http://localhost:3000/next
 Content-Type: application/json
 
 {
+  "sessionId": "foo",
   "type": "SELECT",
   "data": "password"
 }
 ```
 
 ```http request
-POST http://localhost:3000/next
+POST http://localhost:3000/next?sessionId=foo
 Content-Type: application/json
 
 {
+  "sessionId": "foo",
   "type": "INPUT",
   "data": {
     "name": "test",
