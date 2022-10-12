@@ -20,9 +20,7 @@ const stateFromMachine = (actor: InterpreterFrom<typeof machine>) => ({
 });
 
 app.post("/start", async (req, res) => {
-  const actor = interpret(machine).onTransition((state) =>
-    console.log(state.value)
-  );
+  const actor = interpret(machine);
   const sessionId = randomUUID();
   console.log(sessionId);
 
@@ -39,14 +37,12 @@ app.post("/start", async (req, res) => {
 
 app.post("/next", async (req, res) => {
   const { sessionId, ...data } = req.body;
-  console.log(sessionId);
   const actor = sessions.get(sessionId);
 
   if (!actor) {
     throw new Error("Session not found");
   }
 
-  console.log(data);
   actor.send(data);
 
   await waitFor(actor, (state) => state.hasTag("ui"));
