@@ -34,7 +34,7 @@ export const machine = createMachine<Context>(
       initial: {
         invoke: {
           src: async () => {
-            await delay(1000);
+            await delay(100);
 
             return [Provider.PASSWORD, Provider.REDIRECT];
           },
@@ -72,7 +72,7 @@ export const machine = createMachine<Context>(
       fetchFields: {
         invoke: {
           src: async () => {
-            await delay(1000);
+            await delay(100);
 
             return [
               {
@@ -108,7 +108,7 @@ export const machine = createMachine<Context>(
       checkFields: {
         invoke: {
           src: async (context, event) => {
-            await delay(1000);
+            await delay(100);
 
             if (
               event.data.username !== "test" ||
@@ -135,7 +135,7 @@ export const machine = createMachine<Context>(
       },
       credentials: {
         invoke: {
-          src: () => delay(1000),
+          src: () => delay(100),
           onDone: { target: "done" },
           onError: { target: "error", actions: "error" },
         },
