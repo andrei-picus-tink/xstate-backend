@@ -4,12 +4,12 @@ config:
     - duration: 10
       arrivalRate: 5
       name: Warm up
-    - duration: 30
+    - duration: 20
       arrivalRate: 5
-      rampTo: 50
+      rampTo: 100
       name: Ramp up load
-    - duration: 60
-      arrivalRate: 50
+    - duration: 30
+      arrivalRate: 500
       name: Sustained load
 
 scenarios:
