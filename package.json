@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "ts-node-dev index.ts"
+    "dev": "ts-node-dev index.ts",
+    "stress": "artillery run artillery.yaml"
   },
   "dependencies": {
     "cors": "~2.8.5",
@@ -15,6 +16,7 @@
     "@types/cors": "~2.8.12",
     "@types/node": "~17.0.43",
     "@types/express": "~4.17.13",
+    "artillery": "~2.0.0-23",
     "typescript": "~4.7.3",
     "eslint": "~8.17.0",
     "@nighttrax/eslint-config-ts": "~10.0.0-beta.2",

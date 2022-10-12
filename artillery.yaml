@@ -1,0 +1,37 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 10
+      arrivalRate: 5
+      name: Warm up
+    - duration: 30
+      arrivalRate: 5
+      rampTo: 50
+      name: Ramp up load
+    - duration: 60
+      arrivalRate: 50
+      name: Sustained load
+
+scenarios:
+  - name: "Password provider"
+    flow:
+      - post:
+          url: "/start"
+          capture:
+            - json: "$.sessionId"
+              as: "sessionId"
+              log: "{{ sessionId }}"
+      - post:
+          url: "/next"
+          json:
+            sessionId: "{{ sessionId }}"
+            type: "SELECT"
+            data: "password"
+      - post:
+          url: "/next"
+          json:
+            sessionId: "{{ sessionId }}"
+            type: "INPUT"
+            data:
+              username: "test"
+              password: "password"
