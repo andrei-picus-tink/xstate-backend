@@ -25,24 +25,16 @@ export const machine = createMachine<Context>(
     on: {
       "*": {
         target: "error",
-        actions: assign({
-          error: (_) => "Invalid event",
-        }),
+        actions: "invalidEvent",
       },
     },
     states: {
       initial: {
         invoke: {
-          src: async () => {
-            await delay(100);
-
-            return [Provider.PASSWORD, Provider.REDIRECT];
-          },
+          src: "fetchProviders",
           onDone: {
             target: "providers",
-            actions: assign({
-              providers: (context, event) => event.data,
-            }),
+            actions: "storeProviders",
           },
           onError: { target: "error", actions: "error" },
         },
@@ -52,16 +44,14 @@ export const machine = createMachine<Context>(
         on: {
           SELECT: {
             target: "selectedProvider",
-            actions: assign({
-              selectedProvider: (context, event) => event.data,
-            }),
+            actions: "storeSelectedProvider",
           },
         },
       },
       selectedProvider: {
         always: [
           {
-            cond: (context) => context.selectedProvider === Provider.PASSWORD,
+            cond: "isPasswordProvider",
             target: "fetchFields",
           },
           {
@@ -71,25 +61,10 @@ export const machine = createMachine<Context>(
       },
       fetchFields: {
         invoke: {
-          src: async () => {
-            await delay(100);
-
-            return [
-              {
-                type: "text",
-                name: "username",
-              },
-              {
-                type: "text",
-                name: "password",
-              },
-            ];
-          },
+          src: "fetchFields",
           onDone: {
             target: "fields",
-            actions: assign({
-              fields: (_, event) => event.data,
-            }),
+            actions: "storeFields",
           },
         },
       },
@@ -107,16 +82,7 @@ export const machine = createMachine<Context>(
       },
       checkFields: {
         invoke: {
-          src: async (context, event) => {
-            await delay(100);
-
-            if (
-              event.data.username !== "test" ||
-              event.data.password !== "password"
-            ) {
-              throw new Error("invalid credentials");
-            }
-          },
+          src: "checkFields",
           onDone: { target: "credentials" },
           onError: {
             target: "error",
@@ -135,7 +101,7 @@ export const machine = createMachine<Context>(
       },
       credentials: {
         invoke: {
-          src: () => delay(100),
+          src: "processCredentials",
           onDone: { target: "done" },
           onError: { target: "error", actions: "error" },
         },
@@ -151,9 +117,57 @@ export const machine = createMachine<Context>(
     },
   },
   {
+    services: {
+      fetchProviders: async () => {
+        await delay(100);
+
+        return [Provider.PASSWORD, Provider.REDIRECT];
+      },
+      processCredentials: () => delay(100),
+      fetchFields: async () => {
+        await delay(100);
+
+        return [
+          {
+            type: "text",
+            name: "username",
+          },
+          {
+            type: "text",
+            name: "password",
+          },
+        ];
+      },
+      checkFields: async (context, event) => {
+        await delay(100);
+
+        if (
+          event.data.username !== "test" ||
+          event.data.password !== "password"
+        ) {
+          throw new Error("invalid credentials");
+        }
+      },
+    },
+    guards: {
+      isPasswordProvider: (context) =>
+        context.selectedProvider === Provider.PASSWORD,
+    },
     actions: {
+      storeProviders: assign({
+        providers: (context, event) => event.data,
+      }),
+      storeSelectedProvider: assign({
+        selectedProvider: (context, event) => event.data,
+      }),
+      storeFields: assign({
+        fields: (_, event) => event.data,
+      }),
       error: assign({
         error: (context, event) => event.data.message,
+      }),
+      invalidEvent: assign({
+        error: (_) => "Invalid event",
       }),
     },
   }
