@@ -5,6 +5,13 @@ Deployed at https://xstate-bff2.onrender.com.
 To start it locally:
 
 ```shell
+yarn
+yarn dev
+```
+
+or 
+
+```shell
 docker build -t xstate .
 docker run -it -p 3000:3000 xstate
 ```
