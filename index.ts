@@ -19,35 +19,43 @@ const stateFromMachine = (actor: InterpreterFrom<typeof machine>) => ({
   context: actor.state.context,
 });
 
-app.post("/start", async (req, res) => {
-  const actor = interpret(machine);
-  const sessionId = randomUUID();
-  console.log(sessionId);
+app.post("/start", async (req, res, next) => {
+  try {
+    const actor = interpret(machine);
+    const sessionId = randomUUID();
+    console.log(sessionId);
 
-  actor.start();
-  sessions.set(sessionId, actor);
+    actor.start();
+    sessions.set(sessionId, actor);
 
-  await waitFor(actor, (state) => state.hasTag("ui"));
+    await waitFor(actor, (state) => state.hasTag("ui"));
 
-  res.json({
-    sessionId,
-    data: stateFromMachine(actor),
-  });
+    res.json({
+      sessionId,
+      data: stateFromMachine(actor),
+    });
+  } catch (e) {
+    next(e);
+  }
 });
 
-app.post("/next", async (req, res) => {
-  const { sessionId, ...data } = req.body;
-  const actor = sessions.get(sessionId);
+app.post("/next", async (req, res, next) => {
+  try {
+    const { sessionId, ...data } = req.body;
+    const actor = sessions.get(sessionId);
 
-  if (!actor) {
-    throw new Error("Session not found");
+    if (!actor) {
+      throw new Error("Session not found");
+    }
+
+    actor.send(data);
+
+    await waitFor(actor, (state) => state.hasTag("ui"));
+
+    res.json(stateFromMachine(actor));
+  } catch (e) {
+    next(e);
   }
-
-  actor.send(data);
-
-  await waitFor(actor, (state) => state.hasTag("ui"));
-
-  res.json(stateFromMachine(actor));
 });
 
 app.listen(port, () => {
