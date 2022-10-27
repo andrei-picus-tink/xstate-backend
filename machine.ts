@@ -5,6 +5,7 @@ type Context = {
   providers?: Provider[];
   selectedProvider?: Provider;
   fields?: { type: string; name: string }[];
+  fieldsInput?: Record<string, string>;
   error?: string;
 };
 
@@ -73,9 +74,7 @@ export const machine = createMachine<Context>(
         on: {
           INPUT: {
             target: "checkFields",
-            actions: assign({
-              fields: (_, event) => event.data,
-            }),
+            actions: "storeFieldsInput",
           },
           BACK: { target: "providers" },
         },
@@ -138,12 +137,12 @@ export const machine = createMachine<Context>(
           },
         ];
       },
-      checkFields: async (context, event) => {
+      checkFields: async (context) => {
         await delay(100);
 
         if (
-          event.data.username !== "test" ||
-          event.data.password !== "password"
+          context.fieldsInput?.username !== "test" ||
+          context.fieldsInput?.password !== "password"
         ) {
           throw new Error("invalid credentials");
         }
@@ -162,6 +161,9 @@ export const machine = createMachine<Context>(
       }),
       storeFields: assign({
         fields: (_, event) => event.data,
+      }),
+      storeFieldsInput: assign({
+        fieldsInput: (_, event) => event.data,
       }),
       error: assign({
         error: (context, event) => event.data.message,
