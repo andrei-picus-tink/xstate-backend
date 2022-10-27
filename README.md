@@ -1,5 +1,9 @@
 ## Start
 
+Deployed at https://xstate-bff2.onrender.com.
+
+To start it locally:
+
 ```shell
 docker build -t xstate .
 docker run -it -p 3000:3000 xstate
@@ -7,7 +11,9 @@ docker run -it -p 3000:3000 xstate
 
 ## API
 
-Check the `Context` type in [the machine](./machine.ts) for API responses.
+The API always responds with `{ value, context }`:
+- `value`: A unique name identifying the current state.
+- `context`: Information that you can use to present something to the user and/or ask for input. Check the `Context` type in [the machine](./machine.ts).
 
 ```http request
 POST http://localhost:3000/start
